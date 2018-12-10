@@ -1,6 +1,5 @@
 # encoding=utf-8
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from common_util import *
 import csv, math
 import time
 
@@ -38,7 +37,6 @@ def test():
 def getAllParts(root_aoi=u'', words=[]):
     for i in range(len(root_aoi)):
         w = root_aoi[i]
-        words.append(w)
         for j in range(i):
             words.append(root_aoi[j:i + 1])
     return words
@@ -56,7 +54,7 @@ def prepare_input():
             count += 1
             if count % 10000 == 0:
                 print count
-            root_aoi = standardize(e['aoi'].decode('utf-8').replace('|', ''))
+            root_aoi = e['aoi'].decode('utf-8').replace('|', '')
             all_words.add(root_aoi)
 
         csvfile.close()
@@ -69,11 +67,24 @@ def prepare_input():
     f.close()
 
 
+
+def prepare_alias_input():
+    otfile = ur'alias_input_test.csv'
+    f = open(otfile, 'wb')
+    words = ur'759城市公寓#旺棠工业园759公寓#0759城市公寓#759公寓'.split('#')
+    for s in words:
+        aoi_ary = getAllParts(s)
+        words_line = ' '.join(aoi_ary).encode('utf-8') + '\n'
+        # print words_line.strip()
+        f.write(words_line)
+    f.close()
+
+
 def compute_tfidf():
     transformer = TfidfTransformer()
     vectorizer = CountVectorizer()
-    infile = ur'E:\work\AOI平台\work2\755\gj\tfidf_input.csv'
-    otfile = ur'E:\work\AOI平台\work2\755\gj\tfidf_output.csv'
+    infile = ur'alias_input_test.csv'
+    otfile = ur'alias_output_test.csv'
     of = open(otfile, 'wb')
 
     corpus = []
@@ -96,8 +107,8 @@ def compute_tfidf():
         result = ''
         for j in range(len(line_data)):
             w = round(line_data[j], 6)
-            if math.fabs(w) > 1e-6:
-                result += words[j] + ':' + str(w) + '   '
+            # if math.fabs(w) > 1e-6:
+            result += words[j] + ':' + str(w) + '   '
         of.write(result.encode('utf-8').strip(' ') + '\n')
     of.close()
 
@@ -105,3 +116,4 @@ def compute_tfidf():
 if __name__ == '__main__':
     # prepare_input()
     compute_tfidf()
+    # prepare_alias_input()
